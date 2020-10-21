@@ -22,7 +22,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
 
 --- a/fs/btrfs/ctree.h
 +++ b/fs/btrfs/ctree.h
-@@ -2770,10 +2770,12 @@ enum btrfs_reserve_flush_enum {
+@@ -2772,10 +2772,12 @@ enum btrfs_reserve_flush_enum {
  enum btrfs_flush_state {
  	FLUSH_DELAYED_ITEMS_NR	=	1,
  	FLUSH_DELAYED_ITEMS	=	2,
@@ -41,8 +41,8 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  int btrfs_alloc_data_chunk_ondemand(struct btrfs_inode *inode, u64 bytes);
 --- a/fs/btrfs/extent-tree.c
 +++ b/fs/btrfs/extent-tree.c
-@@ -5053,6 +5053,20 @@ static int flush_space(struct btrfs_fs_i
- 		shrink_delalloc(root, num_bytes * 2, num_bytes,
+@@ -5071,6 +5071,20 @@ static int flush_space(struct btrfs_fs_i
+ 		shrink_delalloc(fs_info, num_bytes * 2, num_bytes,
  				state == FLUSH_DELALLOC_WAIT);
  		break;
 +	case FLUSH_DELAYED_REFS_NR:
@@ -64,7 +64,7 @@ Acked-by: Nikolay Borisov <nborisov@suse.com>
  		if (IS_ERR(trans)) {
 --- a/include/trace/events/btrfs.h
 +++ b/include/trace/events/btrfs.h
-@@ -1008,6 +1008,8 @@ TRACE_EVENT(btrfs_trigger_flush,
+@@ -1007,6 +1007,8 @@ TRACE_EVENT(btrfs_trigger_flush,
  		{ FLUSH_DELAYED_ITEMS,		"FLUSH_DELAYED_ITEMS"},		\
  		{ FLUSH_DELALLOC,		"FLUSH_DELALLOC"},		\
  		{ FLUSH_DELALLOC_WAIT,		"FLUSH_DELALLOC_WAIT"},		\
