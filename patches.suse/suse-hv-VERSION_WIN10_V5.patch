@@ -1,0 +1,18 @@
+Subject: hyperv_fb: disable superfluous VERSION_WIN10_V5 case
+From: Olaf Hering <ohering@suse.de>
+Patch-mainline: never, old code base
+References: bsc#1175306
+
+The default case does the same what VERSION_WIN10_V5 would do.
+
+--- a/drivers/video/fbdev/hyperv_fb.c
++++ b/drivers/video/fbdev/hyperv_fb.c
+@@ -651,7 +651,7 @@ static int synthvid_connect_vsp(struct h
+ 	/* Negotiate the protocol version with host */
+ 	switch (vmbus_proto_version) {
+ 	case VERSION_WIN10:
+-	case VERSION_WIN10_V5:
++/*	case VERSION_WIN10_V5: */
+ 		ret = synthvid_negotiate_ver(hdev, SYNTHVID_VERSION_WIN10);
+ 		if (!ret)
+ 			break;
