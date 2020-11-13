@@ -3,7 +3,7 @@ From: Qu Wenruo <wqu@suse.com>
 Date: Wed, 20 May 2020 14:58:51 +0800
 Patch-mainline: v5.8-rc1
 Git-commit: 1dae7e0e58b484eaa43d530f211098fdeeb0f404
-References: bsc#1171417 bsc#1160947 bsc#1172366
+References: bsc#1171417 bsc#1160947 bsc#1172366 bsc#1176922
 Subject: [PATCH 2/2] btrfs: reloc: clear DEAD_RELOC_TREE bit for orphan roots
  to prevent runaway balance
 
@@ -48,5 +48,5 @@ Signed-off-by: David Sterba <dsterba@suse.com>
 +				clear_bit(BTRFS_ROOT_DEAD_RELOC_TREE,
 +					  &root->state);
  			}
- 
+
  			list_del_init(&reloc_root->root_list);
