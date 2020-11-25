@@ -15,3 +15,18 @@ This is likely to increase the number of worker threads but as most work
 items complete extremely quickly, it won't increase it much.
 
 Signed-off-by: NeilBrown <neilb@suse.de>
+---
+ fs/nfs/inode.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/fs/nfs/inode.c
++++ b/fs/nfs/inode.c
+@@ -2025,7 +2025,7 @@ static int nfsiod_start(void)
+ {
+ 	struct workqueue_struct *wq;
+ 	dprintk("RPC:       creating workqueue nfsiod\n");
+-	wq = alloc_workqueue("nfsiod", WQ_MEM_RECLAIM, 0);
++	wq = alloc_workqueue("nfsiod", WQ_MEM_RECLAIM | WQ_CPU_INTENSIVE, 0);
+ 	if (wq == NULL)
+ 		return -ENOMEM;
+ 	nfsiod_workqueue = wq;
