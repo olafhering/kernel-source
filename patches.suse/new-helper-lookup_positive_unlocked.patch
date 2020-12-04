@@ -32,7 +32,7 @@ Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
 
 --- a/fs/cifs/cifsfs.c
 +++ b/fs/cifs/cifsfs.c
-@@ -687,11 +687,6 @@
+@@ -707,11 +707,6 @@
  		struct inode *dir = d_inode(dentry);
  		struct dentry *child;
  
@@ -44,7 +44,7 @@ Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
  		if (!S_ISDIR(dir->i_mode)) {
  			dput(dentry);
  			dentry = ERR_PTR(-ENOTDIR);
-@@ -708,7 +703,7 @@
+@@ -728,7 +723,7 @@
  		while (*s && *s != sep)
  			s++;
  
@@ -55,14 +55,12 @@ Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
  	} while (!IS_ERR(dentry));
 --- a/fs/debugfs/inode.c
 +++ b/fs/debugfs/inode.c
-@@ -276,15 +276,11 @@
+@@ -281,13 +281,9 @@
+ 	if (!parent)
  		parent = debugfs_mount->mnt_root;
  
- 	inode_lock(d_inode(parent));
--	dentry = lookup_one_len(name, parent, strlen(name));
+-	dentry = lookup_one_len_unlocked(name, parent, strlen(name));
 +	dentry = lookup_positive_unlocked(name, parent, strlen(name));
- 	inode_unlock(d_inode(parent));
- 
  	if (IS_ERR(dentry))
  		return NULL;
 -	if (!d_really_is_positive(dentry)) {
@@ -195,7 +193,7 @@ Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
  	}
 --- a/fs/quota/dquot.c
 +++ b/fs/quota/dquot.c
-@@ -2456,21 +2456,14 @@
+@@ -2457,21 +2457,14 @@
  	struct dentry *dentry;
  	int error;
  

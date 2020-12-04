@@ -1,0 +1,28 @@
+From cd1c0c9321999737073dcfc3364e194e02604bce Mon Sep 17 00:00:00 2001
+From: Al Viro <viro@zeniv.linux.org.uk>
+Date: Thu Mar  8 11:01:22 2018 -0500
+Subject: [PATCH] debugfs_lookup(): switch to lookup_one_len_unlocked() 
+Git-commit: cd1c0c9321999737073dcfc3364e194e02604bce
+References: bsc#1171979
+Patch-mainline: v4.17-rc1
+
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+Acked-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+
+diff --git a/fs/debugfs/inode.c b/fs/debugfs/inode.c
+index 63a998c..13b0135 100644
+--- a/fs/debugfs/inode.c
++++ b/fs/debugfs/inode.c
+@@ -270,10 +270,7 @@ struct dentry *debugfs_lookup(const char *name, struct dentry *parent)
+ 	if (!parent)
+ 		parent = debugfs_mount->mnt_root;
+ 
+-	inode_lock(d_inode(parent));
+-	dentry = lookup_one_len(name, parent, strlen(name));
+-	inode_unlock(d_inode(parent));
+-
++	dentry = lookup_one_len_unlocked(name, parent, strlen(name));
+ 	if (IS_ERR(dentry))
+ 		return NULL;
+ 	if (!d_really_is_positive(dentry)) {
