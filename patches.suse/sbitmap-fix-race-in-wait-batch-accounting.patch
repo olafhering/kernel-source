@@ -88,7 +88,7 @@ Acked-by: Coly Li <colyli@suse.de>
  		 */
 -		atomic_cmpxchg(&ws->wait_cnt, wait_cnt, wait_cnt + wake_batch);
 -		sbq_index_atomic_inc(&sbq->wake_index);
--		wake_up(&ws->wait);
+-		wake_up_nr(&ws->wait, wake_batch);
 +		ret = atomic_cmpxchg(&ws->wait_cnt, wait_cnt, wake_batch);
 +		if (ret == wait_cnt) {
 +			sbq_index_atomic_inc(&sbq->wake_index);
