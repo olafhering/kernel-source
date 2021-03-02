@@ -21,8 +21,8 @@ Signed-off-by: Steve French <stfrench@microsoft.com>
 Acked-by: Paulo Alcantara <palcantara@suse.de>
 ---
  fs/cifs/connect.c   |   35 ++++++++++++++++++++++++++++++++++-
- fs/cifs/dfs_cache.c |   33 +++++++++++++++++----------------
- 2 files changed, 51 insertions(+), 17 deletions(-)
+ fs/cifs/dfs_cache.c |   35 ++++++++++++++++++-----------------
+ 2 files changed, 52 insertions(+), 18 deletions(-)
 
 --- a/fs/cifs/connect.c
 +++ b/fs/cifs/connect.c
@@ -130,8 +130,9 @@ Acked-by: Paulo Alcantara <palcantara@suse.de>
  static inline void dump_ce(const struct cache_entry *ce)
  {
 -	cifs_dbg(FYI, "cache entry: path=%s,type=%s,ttl=%d,etime=%ld,"
+-		 "interlink=%s,path_consumed=%d,expired=%s\n", ce->path,
 +	cifs_dbg(FYI, "cache entry: path=%s,type=%s,ttl=%d,etime=%ld,hdr_flags=0x%x,ref_flags=0x%x,interlink=%s,path_consumed=%d,expired=%s\n",
- 		 "interlink=%s,path_consumed=%d,expired=%s\n", ce->path,
++		 ce->path,
  		 ce->srvtype == DFS_TYPE_ROOT ? "root" : "link", ce->ttl,
  		 ce->etime.tv_nsec,
 -		 IS_INTERLINK_SET(ce->flags) ? "yes" : "no",
