@@ -515,7 +515,7 @@ Acked-by: Gary Lin <glin@suse.com>
 +			}
  
  			if (fp->code == (BPF_ALU | BPF_DIV | BPF_X) ||
- 			    fp->code == (BPF_ALU | BPF_MOD | BPF_X))
+ 			    fp->code == (BPF_ALU | BPF_MOD | BPF_X)) {
 @@ -550,21 +712,31 @@ jmp_rest:
  			break;
  
