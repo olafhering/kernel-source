@@ -1,0 +1,22 @@
+From: Olaf Hering <ohering@suse.de>
+Subject: hv: clear ring_buffer pointer during cleanup (part of ae6935ed)
+Patch-mainline: never, kabi concerns
+References: bsc#1181032
+
+This branch can not receive ae6935ed7d424ffa74d634da00767e7b03c98fd3 due to kABI rules.
+Just clear the pointer to make sure hv_ringbuffer_get_debuginfo will exit early.
+It may still race with sysfs access.
+
+--- a/drivers/hv/ring_buffer.c
++++ b/drivers/hv/ring_buffer.c
+@@ -242,6 +242,10 @@ int hv_ringbuffer_init(struct hv_ring_bu
+ /* Cleanup the ring buffer. */
+ void hv_ringbuffer_cleanup(struct hv_ring_buffer_info *ring_info)
+ {
++	void *ring_buffer = ring_info->ring_buffer;
++	ring_info->ring_buffer = NULL;
++	vunmap(ring_buffer);
++	return;
+ 	vunmap(ring_info->ring_buffer);
+ }
+ 
