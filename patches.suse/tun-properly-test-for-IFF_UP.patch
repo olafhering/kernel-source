@@ -30,12 +30,12 @@ Reported-by: syzbot <syzkaller@googlegroups.com>
 Signed-off-by: David S. Miller <davem@davemloft.net>
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- drivers/net/tun.c |   15 +++++++++++----
+ drivers/net/tun.c | 15 +++++++++++----
  1 file changed, 11 insertions(+), 4 deletions(-)
 
 --- a/drivers/net/tun.c
 +++ b/drivers/net/tun.c
-@@ -1220,9 +1220,6 @@ static ssize_t tun_get_user(struct tun_s
+@@ -1231,9 +1231,6 @@ static ssize_t tun_get_user(struct tun_struct *tun, struct tun_file *tfile,
  	int err;
  	u32 rxhash;
  
@@ -45,7 +45,7 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	if (!(tun->flags & IFF_NO_PI)) {
  		if (len < sizeof(pi))
  			return -EINVAL;
-@@ -1297,9 +1294,11 @@ static ssize_t tun_get_user(struct tun_s
+@@ -1308,9 +1305,11 @@ static ssize_t tun_get_user(struct tun_struct *tun, struct tun_file *tfile,
  		err = skb_copy_datagram_from_iter(skb, 0, from, len);
  
  	if (err) {
@@ -58,8 +58,8 @@ Signed-off-by: Jiri Slaby <jslaby@suse.cz>
  	}
  
  	if (virtio_net_hdr_to_skb(skb, &gso, tun_is_little_endian(tun))) {
-@@ -1350,11 +1349,19 @@ static ssize_t tun_get_user(struct tun_s
- 	skb_probe_transport_header(skb, 0);
+@@ -1361,11 +1360,19 @@ static ssize_t tun_get_user(struct tun_struct *tun, struct tun_file *tfile,
+ 	skb_probe_transport_header(skb);
  
  	rxhash = skb_get_hash(skb);
 +
