@@ -4,7 +4,9 @@ Date: Tue, 11 May 2021 13:12:18 -0500
 Subject: [PATCH] scsi: ibmvfc: Handle move login failure
 
 References: bsc#1185938 ltc#192043
-Patch-mainline: submitted https://lore.kernel.org/linux-scsi/1620756740-7045-1-git-send-email-brking@linux.vnet.ibm.com/
+Patch-mainline: queued
+Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Git-commit: d5b45dd5ba6c944b17118530843e67bf9c096e49
 
 When service is being performed on an SVC with NPIV enabled, the WWPN of
 the canister / node being serviced fails over to the another canister /

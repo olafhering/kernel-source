@@ -4,7 +4,9 @@ Date: Tue, 11 May 2021 13:12:19 -0500
 Subject: [PATCH] scsi: ibmvfc: Avoid move login if fast fail is enabled
 
 References: bsc#1185938 ltc#192043
-Patch-mainline: submitted https://lore.kernel.org/linux-scsi/1620756740-7045-1-git-send-email-brking@linux.vnet.ibm.com/
+Patch-mainline: queued
+Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/jejb/scsi.git
+Git-commit: 5114975eb2de4e70d9d43b57912e1aee12ec090b
 
 If fast fail is enabled and we encounter a WWPN moving from one port id to
 another port id with I/O outstanding, if we use the move login MAD,
