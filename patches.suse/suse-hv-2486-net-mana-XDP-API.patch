@@ -1,0 +1,68 @@
+From: Olaf Hering <ohering@suse.de>
+Subject: net: mana: Add XDP support
+Patch-mainline: never, stale API
+References: bsc#1193507
+
+--- a/drivers/net/ethernet/microsoft/mana/mana.h
++++ b/drivers/net/ethernet/microsoft/mana/mana.h
+@@ -4,6 +4,9 @@
+ #ifndef _MANA_H
+ #define _MANA_H
+ 
++#include <linux/filter.h>
++#define netdev_bpf netdev_xdp
++#define ndo_bpf    ndo_xdp
+ #include "gdma.h"
+ #include "hw_channel.h"
+ 
+@@ -299,7 +302,6 @@ struct mana_rxq {
+ 	struct mana_stats stats;
+ 
+ 	struct bpf_prog __rcu *bpf_prog;
+-	struct xdp_rxq_info xdp_rxq;
+ 
+ 	/* MUST BE THE LAST MEMBER:
+ 	 * Each receive buffer has an associated mana_recv_buf_oob.
+--- a/drivers/net/ethernet/microsoft/mana/mana_bpf.c
++++ b/drivers/net/ethernet/microsoft/mana/mana_bpf.c
+@@ -6,7 +6,6 @@
+ #include <linux/mm.h>
+ #include <linux/bpf.h>
+ #include <linux/bpf_trace.h>
+-#include <net/xdp.h>
+ 
+ #include "mana.h"
+ 
+@@ -44,8 +43,9 @@ u32 mana_run_xdp(struct net_device *ndev
+ 	if (!prog)
+ 		goto out;
+ 
+-	xdp_init_buff(xdp, PAGE_SIZE, &rxq->xdp_rxq);
+-	xdp_prepare_buff(xdp, buf_va, XDP_PACKET_HEADROOM, pkt_len, false);
++	xdp->data_hard_start = buf_va;
++	xdp->data = buf_va + XDP_PACKET_HEADROOM;
++	xdp->data_end = buf_va + XDP_PACKET_HEADROOM + pkt_len;
+ 
+ 	act = bpf_prog_run_xdp(prog, xdp);
+ 
+--- a/drivers/net/ethernet/microsoft/mana/mana_en.c
++++ b/drivers/net/ethernet/microsoft/mana/mana_en.c
+@@ -1327,7 +1327,6 @@ static void mana_destroy_rxq(struct mana
+ 
+ 	napi_disable(napi);
+ 
+-	xdp_rxq_info_unreg(&rxq->xdp_rxq);
+ 
+ 	netif_napi_del(napi);
+ 
+@@ -1525,10 +1524,6 @@ static struct mana_rxq *mana_create_rxq(
+ 
+ 	netif_napi_add(ndev, &cq->napi, mana_poll, 1);
+ 
+-	WARN_ON(xdp_rxq_info_reg(&rxq->xdp_rxq, ndev, rxq_idx /*,
+-				 cq->napi.napi_id*/));
+-	WARN_ON(xdp_rxq_info_reg_mem_model(&rxq->xdp_rxq,
+-					   MEM_TYPE_PAGE_SHARED, NULL));
+ 
+ 	napi_enable(&cq->napi);
+ 
