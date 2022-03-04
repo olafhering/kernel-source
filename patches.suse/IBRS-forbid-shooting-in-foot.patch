@@ -9,25 +9,35 @@ enabling the support.
 
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- arch/x86/kernel/cpu/bugs.c |    9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+ arch/x86/kernel/cpu/bugs.c |   13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -488,10 +488,13 @@ static void __init spectre_v2_select_mit
- 		break;
+@@ -956,6 +956,14 @@ static void __init spectre_v2_select_mit
+ 	case SPECTRE_V2_CMD_NONE:
+ 		return;
  
- 	case SPECTRE_V2_CMD_IBRS:
--		mode = SPECTRE_V2_IBRS;
--		setup_force_cpu_cap(X86_FEATURE_USE_IBRS);
--		goto specv2_set_mode;
++	case SPECTRE_V2_CMD_IBRS:
 +		if (boot_cpu_has(X86_FEATURE_IBRS)) {
 +			mode = SPECTRE_V2_IBRS;
 +			setup_force_cpu_cap(X86_FEATURE_USE_IBRS);
-+			goto specv2_set_mode;
++			break;
 +		}
- 
++
 +		/* fall through */
  	case SPECTRE_V2_CMD_FORCE:
  	case SPECTRE_V2_CMD_AUTO:
  		if (boot_cpu_has(X86_FEATURE_IBRS_ENHANCED)) {
+@@ -966,11 +974,6 @@ static void __init spectre_v2_select_mit
+ 		mode = spectre_v2_select_retpoline();
+ 		break;
+ 
+-	case SPECTRE_V2_CMD_IBRS:
+-		mode = SPECTRE_V2_IBRS;
+-		setup_force_cpu_cap(X86_FEATURE_USE_IBRS);
+-		break;
+-
+ 	case SPECTRE_V2_CMD_RETPOLINE_LFENCE:
+ 		mode = SPECTRE_V2_LFENCE;
+ 		break;
