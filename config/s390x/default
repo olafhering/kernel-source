@@ -2080,10 +2080,6 @@ CONFIG_BCMA_POSSIBLE=y
 # Graphics support
 #
 # CONFIG_DRM is not set
-
-#
-# ACP (Audio CoProcessor) Configuration
-#
 # CONFIG_DRM_LIB_RANDOM is not set
 
 #
@@ -3092,6 +3088,7 @@ CONFIG_CORDIC=m
 CONFIG_IRQ_POLL=y
 CONFIG_MPILIB=y
 CONFIG_SIGNATURE=y
+CONFIG_DIMLIB=y
 CONFIG_OID_REGISTRY=y
 # CONFIG_SG_SPLIT is not set
 CONFIG_SG_POOL=y
