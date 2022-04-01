@@ -1,0 +1,46 @@
+From: Tal Gilboa <talgi@mellanox.com>
+Date: Mon, 14 Jan 2019 15:32:49 +0200
+Subject: linux/dim: Rename net_dim_sample() to net_dim_update_sample()
+Patch-mainline: v5.3-rc1
+Git-commit: e5b6ab02d7aa4118c9a36491633812dcc442acbe
+References: bsc#1197099 jsc#SLE-24124
+
+In order to avoid confusion between the function and the similarly
+named struct.
+In preparation for removing the 'net' prefix from dim members.
+
+SUSE: Only updated include/linux/*
+
+Signed-off-by: Tal Gilboa <talgi@mellanox.com>
+Signed-off-by: Saeed Mahameed <saeedm@mellanox.com>
+Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
+---
+ include/linux/dim.h     |    3 ++-
+ include/linux/net_dim.h |    4 ++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+--- a/include/linux/dim.h
++++ b/include/linux/dim.h
+@@ -123,7 +123,8 @@ static inline void dim_park_tired(struct
+ }
+ 
+ static inline void
+-net_dim_sample(u16 event_ctr, u64 packets, u64 bytes, struct net_dim_sample *s)
++net_dim_update_sample(u16 event_ctr, u64 packets, u64 bytes,
++		      struct net_dim_sample *s)
+ {
+ 	s->time	     = ktime_get();
+ 	s->pkt_ctr   = packets;
+--- a/include/linux/net_dim.h
++++ b/include/linux/net_dim.h
+@@ -261,8 +261,8 @@ static inline void net_dim(struct net_di
+ 		}
+ 		/* fall through */
+ 	case DIM_START_MEASURE:
+-		net_dim_sample(end_sample.event_ctr, end_sample.pkt_ctr, end_sample.byte_ctr,
+-			       &dim->start_sample);
++		net_dim_update_sample(end_sample.event_ctr, end_sample.pkt_ctr,
++				      end_sample.byte_ctr, &dim->start_sample);
+ 		dim->state = DIM_MEASURE_IN_PROGRESS;
+ 		break;
+ 	case DIM_APPLY_NEW_PROFILE:
