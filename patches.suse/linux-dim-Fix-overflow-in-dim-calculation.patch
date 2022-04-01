@@ -1,0 +1,54 @@
+From: Yamin Friedman <yaminf@mellanox.com>
+Date: Tue, 23 Jul 2019 10:22:47 +0300
+Subject: linux/dim: Fix overflow in dim calculation
+Patch-mainline: v5.3-rc4
+Git-commit: f06d0ca45827a5790d7508de4759aed976933d4d
+References: bsc#1197099 jsc#SLE-24124
+
+While using net_dim, a dim_sample was used without ever initializing the
+comps value. Added use of DIV_ROUND_DOWN_ULL() to prevent potential
+overflow, it should not be a problem to save the final result in an int
+because after the division by epms the value should not be larger than a
+few thousand.
+
+[ 1040.127124] UBSAN: Undefined behaviour in lib/dim/dim.c:78:23
+[ 1040.130118] signed integer overflow:
+[ 1040.131643] 134718714 * 100 cannot be represented in type 'int'
+
+SUSE: - Removed broadcom/mellanox driver changes
+      - Added DIV_ROUND_DOWN_ULL macro to avoid kABI breakage due to
+	include/linux/kernel.h changes	
+
+Fixes: 398c2b05bbee ("linux/dim: Add completions count to dim_sample")
+Signed-off-by: Yamin Friedman <yaminf@mellanox.com>
+Signed-off-by: Leon Romanovsky <leonro@mellanox.com>
+Acked-by: Saeed Mahameed <saeedm@mellanox.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
+---
+ lib/dim/dim.c |    7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+--- a/lib/dim/dim.c
++++ b/lib/dim/dim.c
+@@ -54,6 +54,9 @@ void dim_park_tired(struct dim *dim)
+ }
+ EXPORT_SYMBOL(dim_park_tired);
+ 
++#define DIV_ROUND_DOWN_ULL(ll, d) \
++	({ unsigned long long _tmp = (ll); do_div(_tmp, d); _tmp; })
++
+ void dim_calc_stats(struct dim_sample *start, struct dim_sample *end,
+ 		    struct dim_stats *curr_stats)
+ {
+@@ -74,8 +77,8 @@ void dim_calc_stats(struct dim_sample *s
+ 					delta_us);
+ 	curr_stats->cpms = DIV_ROUND_UP(ncomps * USEC_PER_MSEC, delta_us);
+ 	if (curr_stats->epms != 0)
+-		curr_stats->cpe_ratio =
+-				(curr_stats->cpms * 100) / curr_stats->epms;
++		curr_stats->cpe_ratio = DIV_ROUND_DOWN_ULL(
++			curr_stats->cpms * 100, curr_stats->epms);
+ 	else
+ 		curr_stats->cpe_ratio = 0;
+ 
