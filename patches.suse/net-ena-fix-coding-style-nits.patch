@@ -1,0 +1,46 @@
+From: Shay Agroskin <shayagr@amazon.com>
+Date: Tue, 8 Dec 2020 20:02:03 +0200
+Subject: net: ena: fix coding style nits
+Patch-mainline: v5.11-rc1
+Git-commit: 1e5847395eebfc98e89558c9f5d0058b949ddc1d
+References: bsc#1197099 jsc#SLE-24124
+
+This commit fixes two nits, but it does not generate any change to binary
+because of the optimization of gcc.
+
+  - use `count` instead of `channels->combined_count`
+  - change return type from `int` to `bool`
+
+Also add spaces and change macro order in OR assignment to make the code
+easier to read.
+
+Signed-off-by: Sameeh Jubran <sameehj@amazon.com>
+Signed-off-by: Kuniyuki Iwashima <kuniyu@amazon.co.jp>
+Signed-off-by: Shay Agroskin <shayagr@amazon.com>
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+Acked-by: Thomas Bogendoerfer <tbogendoerfer@suse.de>
+---
+ drivers/net/ethernet/amazon/ena/ena_eth_com.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+--- a/drivers/net/ethernet/amazon/ena/ena_eth_com.c
++++ b/drivers/net/ethernet/amazon/ena/ena_eth_com.c
+@@ -578,6 +578,7 @@ int ena_com_rx_pkt(struct ena_com_io_cq
+ 	ena_com_rx_set_flags(io_cq, ena_rx_ctx, cdesc);
+ 
+ 	ena_rx_ctx->descs = nb_hw_desc;
++
+ 	return 0;
+ }
+ 
+@@ -602,8 +603,8 @@ int ena_com_add_single_rx_desc(struct en
+ 
+ 	desc->ctrl = ENA_ETH_IO_RX_DESC_FIRST_MASK |
+ 		     ENA_ETH_IO_RX_DESC_LAST_MASK |
+-		     (io_sq->phase & ENA_ETH_IO_RX_DESC_PHASE_MASK) |
+-		     ENA_ETH_IO_RX_DESC_COMP_REQ_MASK;
++		     ENA_ETH_IO_RX_DESC_COMP_REQ_MASK |
++		     (io_sq->phase & ENA_ETH_IO_RX_DESC_PHASE_MASK);
+ 
+ 	desc->req_id = req_id;
+ 
