@@ -16,7 +16,7 @@ References: bsc#1193507
  #include "hw_channel.h"
  
 @@ -299,7 +302,6 @@ struct mana_rxq {
- 	struct mana_stats stats;
+ 	struct mana_stats_rx stats;
  
  	struct bpf_prog __rcu *bpf_prog;
 -	struct xdp_rxq_info xdp_rxq;
