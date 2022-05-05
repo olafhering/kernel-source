@@ -16,13 +16,13 @@ References: bsc#1193507
  #include "hw_channel.h"
  
 @@ -299,7 +302,6 @@ struct mana_rxq {
- 	struct mana_stats stats;
+ 	struct mana_stats_rx stats;
  
  	struct bpf_prog __rcu *bpf_prog;
 -	struct xdp_rxq_info xdp_rxq;
+ 	struct page *xdp_save_page;
  
  	/* MUST BE THE LAST MEMBER:
- 	 * Each receive buffer has an associated mana_recv_buf_oob.
 --- a/drivers/net/ethernet/microsoft/mana/mana_bpf.c
 +++ b/drivers/net/ethernet/microsoft/mana/mana_bpf.c
 @@ -6,7 +6,6 @@
