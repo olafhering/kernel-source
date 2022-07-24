@@ -2,8 +2,7 @@ From: Pawan Gupta <pawan.kumar.gupta@linux.intel.com>
 Date: Thu, 19 May 2022 20:35:15 -0700
 Subject: KVM: x86/speculation: Disable Fill buffer clear within guests
 Git-commit: 027bbb884be006b05d9c577d6401686053aa789e
-Git-repo: git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git
-Patch-mainline: Queued in tip for v5.19
+Patch-mainline: v5.18-rc7
 References: bsc#1199650 CVE-2022-21166 CVE-2022-21127 CVE-2022-21123 CVE-2022-21125 CVE-2022-21180
 
 The enumeration of MD_CLEAR in CPUID(EAX=7,ECX=0).EDX{bit 10} is not an
@@ -37,7 +36,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 
 --- a/arch/x86/include/asm/msr-index.h
 +++ b/arch/x86/include/asm/msr-index.h
-@@ -123,6 +123,11 @@
+@@ -114,6 +114,11 @@
  						 * VERW clears CPU fill buffer
  						 * even on MDS_NO CPUs.
  						 */
@@ -49,10 +48,10 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  
  #define MSR_IA32_FLUSH_CMD		0x0000010b
  #define L1D_FLUSH			BIT(0)	/*
-@@ -142,6 +147,7 @@
+@@ -131,6 +136,7 @@
  /* SRBDS support */
- #define MSR_IA32_MCU_OPT_CTRL		0x00000123
  #define RNGDS_MITG_DIS			BIT(0)
+ #define MSR_IA32_MCU_OPT_CTRL		0x00000123
 +#define FB_CLEAR_DIS			BIT(3)	/* CPU Fill buffer clear disable */
  
  #define MSR_IA32_SYSENTER_CS		0x00000174
@@ -69,7 +68,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  static int vmx_setup_l1d_flush(enum vmx_l1d_flush_state l1tf)
  {
  	struct page *page;
-@@ -824,6 +827,9 @@ struct vcpu_vmx {
+@@ -823,6 +826,9 @@ struct vcpu_vmx {
  	 */
  	u64 msr_ia32_feature_control;
  	u64 msr_ia32_feature_control_valid_bits;
@@ -79,7 +78,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  };
  
  enum segment_cache_field {
-@@ -1693,6 +1699,61 @@ static void vmcs_load(struct vmcs *vmcs)
+@@ -1686,6 +1692,61 @@ static void vmcs_load(struct vmcs *vmcs)
  		       vmcs, phys_addr);
  }
  
@@ -141,7 +140,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  #ifdef CONFIG_KEXEC_CORE
  /*
   * This bitmap is used to indicate whether the vmclear
-@@ -3775,6 +3836,10 @@ static int vmx_set_msr(struct kvm_vcpu *
+@@ -3765,6 +3826,10 @@ static int vmx_set_msr(struct kvm_vcpu *
  			ret = kvm_set_msr_common(vcpu, msr_info);
  	}
  
@@ -152,7 +151,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  	return ret;
  }
  
-@@ -6109,6 +6174,8 @@ static void vmx_vcpu_reset(struct kvm_vc
+@@ -6077,6 +6142,8 @@ static void vmx_vcpu_reset(struct kvm_vc
  	update_exception_bitmap(vcpu);
  
  	vpid_sync_context(vmx->vpid);
@@ -161,7 +160,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  }
  
  /*
-@@ -9862,6 +9929,8 @@ static void __noclone vmx_vcpu_run(struc
+@@ -9809,6 +9876,8 @@ static void __noclone vmx_vcpu_run(struc
  		 kvm_arch_has_assigned_device(vcpu->kvm))
  		mds_clear_cpu_buffers();
  
@@ -170,7 +169,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  	asm(
  		/* Store host registers */
  		"push %%" _ASM_DX "; push %%" _ASM_BP ";"
-@@ -9991,6 +10060,8 @@ static void __noclone vmx_vcpu_run(struc
+@@ -9938,6 +10007,8 @@ static void __noclone vmx_vcpu_run(struc
  #endif
  	      );
  
@@ -179,7 +178,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  	/*
  	 * We do not use IBRS in the kernel. If this vCPU has used the
  	 * SPEC_CTRL MSR it may have left it on; save the value and
-@@ -13140,6 +13211,8 @@ static int __init vmx_init(void)
+@@ -13075,6 +13146,8 @@ static int __init vmx_init(void)
  		}
  	}
  
@@ -190,7 +189,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  			   crash_vmclear_local_loaded_vmcss);
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
-@@ -1125,6 +1125,9 @@ u64 kvm_get_arch_capabilities(void)
+@@ -1106,6 +1106,9 @@ u64 kvm_get_arch_capabilities(void)
  	 */
  	data |= ARCH_CAP_PSCHANGE_MC_NO;
  

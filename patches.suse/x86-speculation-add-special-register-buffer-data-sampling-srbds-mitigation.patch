@@ -3,7 +3,7 @@ Date: Thu, 16 Apr 2020 17:54:04 +0200
 Subject: x86/speculation: Add Special Register Buffer Data Sampling (SRBDS)
  mitigation
 Git-commit: 7e5b3c267d256822407a22fdce6afdf9cd13f9fb
-Patch-mainline: v5.7 or v5.7-rc6 (next release)
+Patch-mainline: v5.7-rc2
 References: bsc#1154824 CVE-2020-0543
 
 SRBDS is an MDS-like speculative side channel that can leak bits from the
@@ -47,16 +47,16 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  Documentation/ABI/testing/sysfs-devices-system-cpu |    1 
  Documentation/admin-guide/kernel-parameters.txt    |   20 +++
  arch/x86/include/asm/cpufeatures.h                 |    2 
- arch/x86/include/asm/msr-index.h                   |    4 
+ arch/x86/include/asm/msr-index.h                   |    2 
  arch/x86/kernel/cpu/bugs.c                         |  106 +++++++++++++++++++++
  arch/x86/kernel/cpu/common.c                       |   31 ++++++
  arch/x86/kernel/cpu/cpu.h                          |    1 
  drivers/base/cpu.c                                 |    8 +
- 8 files changed, 173 insertions(+)
+ 8 files changed, 171 insertions(+)
 
 --- a/arch/x86/include/asm/cpufeatures.h
 +++ b/arch/x86/include/asm/cpufeatures.h
-@@ -354,6 +354,7 @@
+@@ -348,6 +348,7 @@
  /* Intel-defined CPU features, CPUID level 0x00000007:0 (EDX), word 18 */
  #define X86_FEATURE_AVX512_4VNNIW	(18*32+ 2) /* AVX-512 Neural Network Instructions */
  #define X86_FEATURE_AVX512_4FMAPS	(18*32+ 3) /* AVX-512 Multiply Accumulation Single precision */
@@ -64,7 +64,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  #define X86_FEATURE_TSX_FORCE_ABORT	(18*32+13) /* "" TSX_FORCE_ABORT */
  #define X86_FEATURE_MD_CLEAR		(18*32+10) /* VERW clears CPU buffers */
  #define X86_FEATURE_PCONFIG		(18*32+18) /* Intel PCONFIG */
-@@ -398,5 +399,6 @@
+@@ -392,5 +393,6 @@
  #define X86_BUG_SWAPGS			X86_BUG(21) /* CPU is affected by speculation through SWAPGS */
  #define X86_BUG_TAA			X86_BUG(22) /* CPU is affected by TSX Async Abort(TAA) */
  #define X86_BUG_ITLB_MULTIHIT		X86_BUG(23) /* CPU may incur MCE during certain page attribute changes */
@@ -73,20 +73,18 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  #endif /* _ASM_X86_CPUFEATURES_H */
 --- a/arch/x86/include/asm/msr-index.h
 +++ b/arch/x86/include/asm/msr-index.h
-@@ -118,8 +118,10 @@
+@@ -109,6 +109,8 @@
  #define TSX_CTRL_RTM_DISABLE		BIT(0)	/* Disable RTM feature */
  #define TSX_CTRL_CPUID_CLEAR		BIT(1)	/* Disable TSX enumeration */
  
 +/* SRBDS support */
- #define MSR_IA32_MCU_OPT_CTRL		0x00000123
 +#define RNGDS_MITG_DIS			BIT(0)
- 
  #define MSR_IA32_SYSENTER_CS		0x00000174
  #define MSR_IA32_SYSENTER_ESP		0x00000175
  #define MSR_IA32_SYSENTER_EIP		0x00000176
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -41,6 +41,7 @@ static void __init l1tf_select_mitigatio
+@@ -40,6 +40,7 @@ static void __init l1tf_select_mitigatio
  static void __init mds_select_mitigation(void);
  static void __init mds_print_mitigation(void);
  static void __init taa_select_mitigation(void);
@@ -94,7 +92,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  
  /* The base value of the SPEC_CTRL MSR that always has to be preserved. */
  u64 x86_spec_ctrl_base;
-@@ -108,6 +109,7 @@ void __init check_bugs(void)
+@@ -107,6 +108,7 @@ void __init check_bugs(void)
  	l1tf_select_mitigation();
  	mds_select_mitigation();
  	taa_select_mitigation();
@@ -102,7 +100,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  
  	/*
  	 * As MDS and TAA mitigations are inter-related, print MDS
-@@ -515,6 +517,97 @@ static int __init tsx_async_abort_parse_
+@@ -514,6 +516,97 @@ static int __init tsx_async_abort_parse_
  early_param("tsx_async_abort", tsx_async_abort_parse_cmdline);
  
  #undef pr_fmt
@@ -200,8 +198,8 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  #define pr_fmt(fmt)     "Spectre V1 : " fmt
  
  enum spectre_v1_mitigation {
-@@ -1621,6 +1714,11 @@ static ssize_t spectre_v2_show_state(cha
- 		       spectre_v2_module_string());
+@@ -1508,6 +1601,11 @@ static char *ibpb_state(void)
+ 	return "";
  }
  
 +static ssize_t srbds_show_state(char *buf)
@@ -212,7 +210,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  static ssize_t cpu_show_common(struct device *dev, struct device_attribute *attr,
  			       char *buf, unsigned int bug)
  {
-@@ -1662,6 +1760,9 @@ static ssize_t cpu_show_common(struct de
+@@ -1554,6 +1652,9 @@ static ssize_t cpu_show_common(struct de
  	case X86_BUG_ITLB_MULTIHIT:
  		return itlb_multihit_show_state(buf);
  
@@ -222,7 +220,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  	default:
  		break;
  	}
-@@ -1708,4 +1809,9 @@ ssize_t cpu_show_itlb_multihit(struct de
+@@ -1600,4 +1701,9 @@ ssize_t cpu_show_itlb_multihit(struct de
  {
  	return cpu_show_common(dev, attr, buf, X86_BUG_ITLB_MULTIHIT);
  }
@@ -234,7 +232,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  #endif
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -997,6 +997,27 @@ static const __initconst struct x86_cpu_
+@@ -973,6 +973,27 @@ static const __initconst struct x86_cpu_
  	{}
  };
  
@@ -262,7 +260,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  static bool __init cpu_matches(const struct x86_cpu_id *table, unsigned long which)
  {
  	const struct x86_cpu_id *m = x86_match_cpu(table);
-@@ -1062,6 +1083,15 @@ static void __init cpu_set_bug_bits(stru
+@@ -1038,6 +1059,15 @@ static void __init cpu_set_bug_bits(stru
  	     (ia32_cap & ARCH_CAP_TSX_CTRL_MSR)))
  		setup_force_cpu_bug(X86_BUG_TAA);
  
@@ -278,7 +276,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  	if (cpu_matches(cpu_vuln_whitelist, NO_MELTDOWN))
  		return;
  
-@@ -1479,6 +1509,7 @@ void identify_secondary_cpu(struct cpuin
+@@ -1454,6 +1484,7 @@ void identify_secondary_cpu(struct cpuin
  	mtrr_ap_init();
  	validate_apic_and_package_id(c);
  	x86_spec_ctrl_setup_ap();
@@ -308,7 +306,7 @@ Tested-by: Neelima Krishnan <neelima.krishnan@intel.com>
  Date:		January 2018
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -4280,6 +4280,26 @@
+@@ -4208,6 +4208,26 @@
  	spia_pedr=
  	spia_peddr=
  

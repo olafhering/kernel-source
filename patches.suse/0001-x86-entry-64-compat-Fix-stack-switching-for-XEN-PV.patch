@@ -36,14 +36,12 @@ Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
 Cc: stable@vger.kernel.org
 Link: https://lkml.kernel.org/r/5C3E1128020000780020DFAD@prv1-mh.provo.novell.com
 ---
- arch/x86/entry/entry_64_compat.S | 38 ++++++++-
- 1 file changed, 35 insertions(+), 3 deletions(-)
+ arch/x86/entry/entry_64_compat.S |   36 +++++++++++++++++++++++++++++++++---
+ 1 file changed, 33 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/entry/entry_64_compat.S b/arch/x86/entry/entry_64_compat.S
-index 8eaf8952c408..39913770a44d 100644
 --- a/arch/x86/entry/entry_64_compat.S
 +++ b/arch/x86/entry/entry_64_compat.S
-@@ -322,6 +322,38 @@ sysret32_from_system_call:
+@@ -305,6 +305,36 @@ sysret32_from_system_call:
  END(entry_SYSCALL_compat)
  
  /*
@@ -60,8 +58,6 @@ index 8eaf8952c408..39913770a44d 100644
 +	ALTERNATIVE "movq %rsp, %rdi", "jmp .Lcompat_keep_stack", X86_FEATURE_XENPV
 +	movq    %rsp, %rdi
 +	movq    PER_CPU_VAR(cpu_current_top_of_stack), %rsp
-+	/* Restrict Indirect Branch Speculation */
-+	RESTRICT_IB_SPEC
 +	UNWIND_HINT sp_offset=16 sp_reg=ORC_REG_DI
 +
 +	pushq   7*8(%rdi)		/* regs->ss */
@@ -82,7 +78,7 @@ index 8eaf8952c408..39913770a44d 100644
   * 32-bit legacy system call entry.
   *
   * 32-bit x86 Linux system calls traditionally used the INT $0x80
-@@ -364,11 +396,11 @@ ENTRY(entry_INT80_compat)
+@@ -347,11 +377,11 @@ ENTRY(entry_INT80_compat)
  	movl	%eax, %eax
  
  	pushq	%rax			/* pt_regs->orig_ax */
