@@ -65,17 +65,17 @@ Signed-off-by: Matt Fleming <mfleming@suse.de>
  #include <asm/processor.h>
  #include <asm/apic.h>
  #include <asm/cacheinfo.h>
-@@ -812,6 +813,10 @@ static void init_amd_zn(struct cpuinfo_x
- {
- 	set_cpu_cap(c, X86_FEATURE_ZEN);
+@@ -905,6 +906,10 @@ static void init_amd_zn(struct cpuinfo_x
+ 		if (!cpu_has(c, X86_FEATURE_CPB))
+ 			set_cpu_cap(c, X86_FEATURE_CPB);
  
 +#ifdef CONFIG_NUMA
 +	node_reclaim_distance = 32;
 +#endif
 +
- 	/*
- 	 * Fix erratum 1076: CPB feature bit not being set in CPUID.
- 	 * Always set it, except when running under a hypervisor.
+ 		/*
+ 		 * Zen3 (Fam19 model < 0x10) parts are not susceptible to
+ 		 * Branch Type Confusion, but predate the allocation of the
 --- a/include/linux/topology.h
 +++ b/include/linux/topology.h
 @@ -59,6 +59,9 @@ int arch_update_cpu_topology(void);
