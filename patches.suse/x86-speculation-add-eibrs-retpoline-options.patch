@@ -45,7 +45,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  /* The indirect branch speculation control variants */
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -652,6 +652,9 @@ enum spectre_v2_mitigation_cmd {
+@@ -745,6 +745,9 @@ enum spectre_v2_mitigation_cmd {
  	SPECTRE_V2_CMD_RETPOLINE,
  	SPECTRE_V2_CMD_RETPOLINE_GENERIC,
  	SPECTRE_V2_CMD_RETPOLINE_LFENCE,
@@ -55,7 +55,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  };
  
  enum spectre_v2_user_cmd {
-@@ -723,6 +726,13 @@ spectre_v2_parse_user_cmdline(enum spect
+@@ -816,6 +819,13 @@ spectre_v2_parse_user_cmdline(enum spect
  	return SPECTRE_V2_USER_CMD_AUTO;
  }
  
@@ -69,7 +69,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  static void __init
  spectre_v2_user_select_mitigation(enum spectre_v2_mitigation_cmd v2_cmd)
  {
-@@ -790,7 +800,7 @@ spectre_v2_user_select_mitigation(enum s
+@@ -883,7 +893,7 @@ spectre_v2_user_select_mitigation(enum s
  	 */
  	if (!boot_cpu_has(X86_FEATURE_STIBP) ||
  	    !smt_possible ||
@@ -78,7 +78,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  		return;
  
  	spectre_v2_user_stibp = mode;
-@@ -803,7 +813,9 @@ static const char * const spectre_v2_str
+@@ -896,7 +906,9 @@ static const char * const spectre_v2_str
  	[SPECTRE_V2_NONE]			= "Vulnerable",
  	[SPECTRE_V2_RETPOLINE]			= "Mitigation: Retpolines",
  	[SPECTRE_V2_LFENCE]			= "Mitigation: LFENCE",
@@ -89,7 +89,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  };
  
  static const struct {
-@@ -817,6 +829,9 @@ static const struct {
+@@ -910,6 +922,9 @@ static const struct {
  	{ "retpoline,amd",	SPECTRE_V2_CMD_RETPOLINE_LFENCE,  false },
  	{ "retpoline,lfence",	SPECTRE_V2_CMD_RETPOLINE_LFENCE,  false },
  	{ "retpoline,generic",	SPECTRE_V2_CMD_RETPOLINE_GENERIC, false },
@@ -99,7 +99,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  	{ "auto",		SPECTRE_V2_CMD_AUTO,		  false },
  };
  
-@@ -854,15 +869,29 @@ static enum spectre_v2_mitigation_cmd __
+@@ -947,15 +962,29 @@ static enum spectre_v2_mitigation_cmd __
  
  	if ((cmd == SPECTRE_V2_CMD_RETPOLINE ||
  	     cmd == SPECTRE_V2_CMD_RETPOLINE_LFENCE ||
@@ -133,8 +133,8 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  		return SPECTRE_V2_CMD_AUTO;
  	}
  
-@@ -888,6 +917,25 @@ static bool __init is_skylake_era(void)
- 	return false;
+@@ -964,6 +993,25 @@ static enum spectre_v2_mitigation_cmd __
+ 	return cmd;
  }
  
 +static enum spectre_v2_mitigation __init spectre_v2_select_retpoline(void)
@@ -159,7 +159,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  static void __init spectre_v2_select_mitigation(void)
  {
  	enum spectre_v2_mitigation_cmd cmd = spectre_v2_parse_cmdline();
-@@ -908,49 +956,60 @@ static void __init spectre_v2_select_mit
+@@ -984,49 +1032,60 @@ static void __init spectre_v2_select_mit
  	case SPECTRE_V2_CMD_FORCE:
  	case SPECTRE_V2_CMD_AUTO:
  		if (boot_cpu_has(X86_FEATURE_IBRS_ENHANCED)) {
@@ -249,7 +249,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  	spectre_v2_enabled = mode;
  	pr_info("%s\n", spectre_v2_strings[mode]);
  
-@@ -976,7 +1035,7 @@ specv2_set_mode:
+@@ -1052,7 +1111,7 @@ specv2_set_mode:
  	 * the CPU supports Enhanced IBRS, kernel might un-intentionally not
  	 * enable IBRS around firmware calls.
  	 */
@@ -258,7 +258,7 @@ Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
  		setup_force_cpu_cap(X86_FEATURE_USE_IBRS_FW);
  		pr_info("Enabling Restricted Speculation for firmware calls\n");
  	}
-@@ -1491,7 +1550,7 @@ static ssize_t tsx_async_abort_show_stat
+@@ -1567,7 +1626,7 @@ static ssize_t tsx_async_abort_show_stat
  
  static char *stibp_state(void)
  {

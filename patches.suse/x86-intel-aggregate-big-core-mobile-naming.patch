@@ -34,7 +34,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  arch/x86/events/intel/uncore.c        |    6 ++---
  arch/x86/events/msr.c                 |    6 ++---
  arch/x86/include/asm/intel-family.h   |    6 ++---
- arch/x86/kernel/cpu/bugs.c            |   10 ++++----
+ arch/x86/kernel/cpu/bugs.c            |    6 ++---
  arch/x86/kernel/cpu/intel.c           |    6 ++---
  arch/x86/kernel/tsc.c                 |    4 +--
  drivers/cpufreq/intel_pstate.c        |    4 +--
@@ -42,11 +42,11 @@ Acked-by: Borislav Petkov <bp@suse.de>
  drivers/platform/x86/intel_pmc_core.c |    4 +--
  drivers/powercap/intel_rapl.c         |    6 ++---
  tools/power/x86/turbostat/turbostat.c |   40 +++++++++++++++++-----------------
- 14 files changed, 59 insertions(+), 59 deletions(-)
+ 14 files changed, 57 insertions(+), 57 deletions(-)
 
 --- a/arch/x86/events/intel/core.c
 +++ b/arch/x86/events/intel/core.c
-@@ -4034,7 +4034,7 @@ __init int intel_pmu_init(void)
+@@ -4064,7 +4064,7 @@ __init int intel_pmu_init(void)
  
  	case INTEL_FAM6_HASWELL:
  	case INTEL_FAM6_HASWELL_X:
@@ -55,7 +55,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	case INTEL_FAM6_HASWELL_GT3E:
  		x86_add_quirk(intel_ht_bug);
  		x86_pmu.late_ack = true;
-@@ -4114,10 +4114,10 @@ __init int intel_pmu_init(void)
+@@ -4144,10 +4144,10 @@ __init int intel_pmu_init(void)
  		pr_cont("Knights Landing/Mill events, ");
  		break;
  
@@ -209,19 +209,6 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	case INTEL_FAM6_KABYLAKE:
  		if (c->x86_cache_bits < 44)
  			c->x86_cache_bits = 44;
-@@ -751,10 +751,10 @@ static bool __init is_skylake_era(void)
- 	if (boot_cpu_data.x86_vendor == X86_VENDOR_INTEL &&
- 	    boot_cpu_data.x86 == 6) {
- 		switch (boot_cpu_data.x86_model) {
--		case INTEL_FAM6_SKYLAKE_MOBILE:
-+		case INTEL_FAM6_SKYLAKE_L:
- 		case INTEL_FAM6_SKYLAKE:
- 		case INTEL_FAM6_SKYLAKE_X:
--		case INTEL_FAM6_KABYLAKE_MOBILE:
-+		case INTEL_FAM6_KABYLAKE_L:
- 		case INTEL_FAM6_KABYLAKE:
- 			return true;
- 		}
 --- a/arch/x86/kernel/cpu/intel.c
 +++ b/arch/x86/kernel/cpu/intel.c
 @@ -118,8 +118,8 @@ static const struct sku_microcode spectr
@@ -246,7 +233,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	{ INTEL_FAM6_HASWELL_X,		0x02,	0x3b },
 --- a/arch/x86/kernel/tsc.c
 +++ b/arch/x86/kernel/tsc.c
-@@ -614,9 +614,9 @@ unsigned long native_calibrate_tsc(void)
+@@ -615,9 +615,9 @@ unsigned long native_calibrate_tsc(void)
  
  	if (crystal_khz == 0) {
  		switch (boot_cpu_data.x86_model) {

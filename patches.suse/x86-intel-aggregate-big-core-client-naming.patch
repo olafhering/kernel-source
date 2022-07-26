@@ -35,7 +35,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  arch/x86/events/intel/uncore.c        |    8 ++++----
  arch/x86/events/msr.c                 |    8 ++++----
  arch/x86/include/asm/intel-family.h   |    8 ++++----
- arch/x86/kernel/cpu/bugs.c            |   12 ++++++------
+ arch/x86/kernel/cpu/bugs.c            |    8 ++++----
  arch/x86/kernel/cpu/intel.c           |   10 +++++-----
  arch/x86/kernel/tsc.c                 |    4 ++--
  drivers/cpufreq/intel_pstate.c        |   12 ++++++------
@@ -43,11 +43,11 @@ Acked-by: Borislav Petkov <bp@suse.de>
  drivers/platform/x86/intel_pmc_core.c |    4 ++--
  drivers/powercap/intel_rapl.c         |    8 ++++----
  tools/power/x86/turbostat/turbostat.c |   20 ++++++++++----------
- 15 files changed, 66 insertions(+), 66 deletions(-)
+ 15 files changed, 64 insertions(+), 64 deletions(-)
 
 --- a/arch/x86/events/intel/core.c
 +++ b/arch/x86/events/intel/core.c
-@@ -4032,7 +4032,7 @@ __init int intel_pmu_init(void)
+@@ -4062,7 +4062,7 @@ __init int intel_pmu_init(void)
  		break;
  
  
@@ -56,7 +56,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	case INTEL_FAM6_HASWELL_X:
  	case INTEL_FAM6_HASWELL_ULT:
  	case INTEL_FAM6_HASWELL_GT3E:
-@@ -4059,7 +4059,7 @@ __init int intel_pmu_init(void)
+@@ -4089,7 +4089,7 @@ __init int intel_pmu_init(void)
  		pr_cont("Haswell events, ");
  		break;
  
@@ -65,7 +65,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	case INTEL_FAM6_BROADWELL_XEON_D:
  	case INTEL_FAM6_BROADWELL_GT3E:
  	case INTEL_FAM6_BROADWELL_X:
-@@ -4115,10 +4115,10 @@ __init int intel_pmu_init(void)
+@@ -4145,10 +4145,10 @@ __init int intel_pmu_init(void)
  		break;
  
  	case INTEL_FAM6_SKYLAKE_MOBILE:
@@ -261,19 +261,6 @@ Acked-by: Borislav Petkov <bp@suse.de>
  		if (c->x86_cache_bits < 44)
  			c->x86_cache_bits = 44;
  		break;
-@@ -752,10 +752,10 @@ static bool __init is_skylake_era(void)
- 	    boot_cpu_data.x86 == 6) {
- 		switch (boot_cpu_data.x86_model) {
- 		case INTEL_FAM6_SKYLAKE_MOBILE:
--		case INTEL_FAM6_SKYLAKE_DESKTOP:
-+		case INTEL_FAM6_SKYLAKE:
- 		case INTEL_FAM6_SKYLAKE_X:
- 		case INTEL_FAM6_KABYLAKE_MOBILE:
--		case INTEL_FAM6_KABYLAKE_DESKTOP:
-+		case INTEL_FAM6_KABYLAKE:
- 			return true;
- 		}
- 	}
 --- a/arch/x86/kernel/cpu/intel.c
 +++ b/arch/x86/kernel/cpu/intel.c
 @@ -115,21 +115,21 @@ struct sku_microcode {
@@ -305,7 +292,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	{ INTEL_FAM6_IVYBRIDGE_X,	0x04,	0x42a },
 --- a/arch/x86/kernel/tsc.c
 +++ b/arch/x86/kernel/tsc.c
-@@ -615,9 +615,9 @@ unsigned long native_calibrate_tsc(void)
+@@ -616,9 +616,9 @@ unsigned long native_calibrate_tsc(void)
  	if (crystal_khz == 0) {
  		switch (boot_cpu_data.x86_model) {
  		case INTEL_FAM6_SKYLAKE_MOBILE:
@@ -388,7 +375,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  	ICPU(INTEL_FAM6_SKYLAKE_X,		idle_cpu_skx),
  	ICPU(INTEL_FAM6_XEON_PHI_KNL,		idle_cpu_knl),
  	ICPU(INTEL_FAM6_XEON_PHI_KNM,		idle_cpu_knl),
-@@ -1314,7 +1314,7 @@ static void intel_idle_state_table_updat
+@@ -1319,7 +1319,7 @@ static void intel_idle_state_table_updat
  	case INTEL_FAM6_ATOM_GOLDMONT_PLUS:
  		bxt_idle_state_table_update();
  		break;

@@ -68,7 +68,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  void
  x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl, bool setguest)
  {
-@@ -332,6 +309,12 @@ static int __init l1tf_cmdline(char *str
+@@ -333,6 +310,12 @@ static int __init l1tf_cmdline(char *str
  early_param("l1tf", l1tf_cmdline);
  
  
@@ -81,7 +81,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  #ifdef RETPOLINE
  static bool spectre_v2_bad_module;
  
-@@ -353,18 +336,6 @@ static inline const char *spectre_v2_mod
+@@ -354,18 +337,6 @@ static inline const char *spectre_v2_mod
  static inline const char *spectre_v2_module_string(void) { return ""; }
  #endif
  
@@ -100,7 +100,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  static inline bool match_option(const char *arg, int arglen, const char *opt)
  {
  	int len = strlen(opt);
-@@ -372,24 +343,53 @@ static inline bool match_option(const ch
+@@ -373,24 +344,53 @@ static inline bool match_option(const ch
  	return len == arglen && !strncmp(arg, opt, len);
  }
  
@@ -161,8 +161,8 @@ Acked-by: Borislav Petkov <bp@suse.de>
  
  	if (cmdline_find_option_bool(boot_command_line, "nospectre_v2"))
  		return SPECTRE_V2_CMD_NONE;
-@@ -449,48 +449,6 @@ static bool __init is_skylake_era(void)
- 	return false;
+@@ -434,48 +434,6 @@ static enum spectre_v2_mitigation_cmd __
+ 	return cmd;
  }
  
 -static bool stibp_needed(void)
@@ -210,7 +210,7 @@ Acked-by: Borislav Petkov <bp@suse.de>
  static void __init spectre_v2_select_mitigation(void)
  {
  	enum spectre_v2_mitigation_cmd cmd = spectre_v2_parse_cmdline();
-@@ -593,6 +551,48 @@ specv2_set_mode:
+@@ -579,6 +537,48 @@ specv2_set_mode:
  	arch_smt_update();
  }
  
