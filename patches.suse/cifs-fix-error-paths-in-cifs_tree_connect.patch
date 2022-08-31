@@ -1,0 +1,86 @@
+From d7dc96fcf96f7455cb78cf66610287439338cd5a Mon Sep 17 00:00:00 2001
+From: Paulo Alcantara <pc@cjr.nz>
+Date: Tue, 16 Aug 2022 18:34:29 -0300
+Subject: [PATCH] cifs: fix error paths in cifs_tree_connect()
+References: bsc#1177440
+Patch-mainline: Not yet, required for trees that contain backport of bacd704a95ad
+
+This fixes some error paths that were incorrectly handled by
+cifs_tree_connect():
+
+- return of uninitialised rc when no targets in cached referral
+- return of wrong rc when !target_match by end of the loop
+- returned -ENOENT when rc == 0 and cached referral had ony one target
+
+Signed-off-by: Paulo Alcantara (SUSE) <pc@cjr.nz>
+Acked-by: Paulo Alcantara <palcantara@suse.de>
+---
+ fs/cifs/connect.c | 25 ++++++++++++++-----------
+ 1 file changed, 14 insertions(+), 11 deletions(-)
+
+diff --git a/fs/cifs/connect.c b/fs/cifs/connect.c
+index 979c8ff7b800..b347143a634c 100644
+--- a/fs/cifs/connect.c
++++ b/fs/cifs/connect.c
+@@ -5492,12 +5492,19 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 	rc = dfs_cache_noreq_find(tcon->dfs_path + 1, &ref, &tl);
+ 	if (rc)
+ 		goto out;
++
++	it = dfs_cache_get_tgt_iterator(&tl);
++	if (!it) {
++		rc = -ENOENT;
++		goto out;
++	}
++
+ 	isroot = ref.server_type == DFS_TYPE_ROOT;
+ 	free_dfs_info_param(&ref);
+ 
+ 	extract_unc_hostname(server->hostname, &tcp_host, &tcp_host_len);
+ 
+-	for (it = dfs_cache_get_tgt_iterator(&tl); it; it = dfs_cache_get_next_tgt(&tl, it)) {
++	for (; it; it = dfs_cache_get_next_tgt(&tl, it)) {
+ 		bool target_match;
+ 
+ 		kfree(share);
+@@ -5527,6 +5534,7 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 
+ 			if (!target_match) {
+ 				cifs_dbg(FYI, "%s: skipping target\n", __func__);
++				rc = -EHOSTUNREACH;
+ 				continue;
+ 			}
+ 		}
+@@ -5538,24 +5546,19 @@ int cifs_tree_connect(const unsigned int xid, struct cifs_tcon *tcon, const stru
+ 			scnprintf(tree, MAX_TREE_SIZE, "\\%s", share);
+ 			rc = ops->tree_connect(xid, tcon->ses, tree, tcon, nlsc);
+ 			/* Only handle prefix paths of DFS link targets */
+-			if (!rc && !isroot) {
++			if (!rc && !isroot)
+ 				rc = update_super_prepath(tcon, prefix);
+-				break;
+-			}
+ 		}
+-		if (rc == -EREMOTE)
++		if (!rc || rc == -EREMOTE)
+ 			break;
+ 	}
+ 
+ 	kfree(share);
+ 	kfree(prefix);
+ 
+-	if (!rc) {
+-		if (it)
+-			rc = dfs_cache_noreq_update_tgthint(tcon->dfs_path + 1, it);
+-		else
+-			rc = -ENOENT;
+-	}
++	if (!rc)
++		rc = dfs_cache_noreq_update_tgthint(tcon->dfs_path + 1, it);
++
+ 	dfs_cache_free_tgts(&tl);
+ out:
+ 	kfree(tree);
+-- 
+2.37.1
+
