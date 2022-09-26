@@ -3,7 +3,7 @@ Date: Tue, 14 Jun 2022 23:15:51 +0200
 Subject: x86/bugs: Enable STIBP for JMP2RET
 Git-commit: e8ec1b6e08a2102d8755ccb06fa26d540f26a2fa
 Patch-mainline: v5.19-rc7
-References: bsc#1199657 CVE-2022-29900 CVE-2022-29901
+References: bsc#1199657 CVE-2022-29900 CVE-2022-29901 bsc#1203271
 
 For untrained return thunks to be fully effective, STIBP must be enabled
 or SMT disabled.
@@ -35,7 +35,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  		return -EINVAL;
  
 -	if (!strcmp(str, "off"))
--		;
+-		retbleed_cmd = RETBLEED_CMD_OFF;
 -	else if (!strcmp(str, "auto"))
 -		retbleed_cmd = RETBLEED_CMD_AUTO;
 -	else if (!strcmp(str, "unret"))
@@ -50,7 +50,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 +		}
 +
 +		if (!strcmp(str, "off")) {
-+			return -EINVAL;
++			retbleed_cmd = RETBLEED_CMD_OFF;
 +		} else if (!strcmp(str, "auto")) {
 +			retbleed_cmd = RETBLEED_CMD_AUTO;
 +		} else if (!strcmp(str, "unret")) {
@@ -77,7 +77,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  		if (boot_cpu_data.x86_vendor != X86_VENDOR_AMD &&
  		    boot_cpu_data.x86_vendor != X86_VENDOR_HYGON)
  			pr_err(RETBLEED_UNTRAIN_MSG);
-@@ -1985,10 +2004,17 @@ static ssize_t srbds_show_state(char *bu
+@@ -1925,10 +1944,17 @@ static ssize_t spectre_v2_show_state(cha
  
  static ssize_t retbleed_show_state(char *buf)
  {
@@ -101,7 +101,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
  }
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -3981,10 +3981,16 @@
+@@ -3936,10 +3936,16 @@
  			Speculative Code Execution with Return Instructions)
  			vulnerability.
  
