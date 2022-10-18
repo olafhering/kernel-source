@@ -14,22 +14,27 @@ do not fallback to IBPB on AMD/Hygon systems if it is not supported.
 
 Fixes: 3ebc17006888 ("x86/bugs: Add retbleed=ibpb")
 Signed-off-by: Thadeu Lima de Souza Cascardo <cascardo@canonical.com>
+
+  [ bp: The fallback to IBPB when RETBLEED_CMD_AUTO doesn't make sense for our
+    trees because upstream has fine-grained config options which we didn't
+    backport. ]
+
 Signed-off-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/kernel/cpu/bugs.c |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ arch/x86/kernel/cpu/bugs.c |    5 +++++
+ 1 file changed, 5 insertions(+)
 
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
-@@ -930,9 +930,13 @@ static void __init retbleed_select_mitig
+@@ -930,9 +930,14 @@ static void __init retbleed_select_mitig
  		break;
  
  	case RETBLEED_CMD_IBPB:
--		retbleed_mitigation = RETBLEED_MITIGATION_IBPB;
 +		if (!boot_cpu_has(X86_FEATURE_IBPB)) {
 +			pr_err("WARNING: CPU does not support IBPB.\n");
 +			goto do_cmd_auto;
 +		}
+ 		retbleed_mitigation = RETBLEED_MITIGATION_IBPB;
  		break;
  
 +do_cmd_auto:
