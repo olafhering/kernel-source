@@ -130,8 +130,8 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 --- a/arch/x86/include/asm/msr-index.h
 +++ b/arch/x86/include/asm/msr-index.h
 @@ -120,6 +120,10 @@
- 						 * bit available to control VERW
- 						 * behavior.
+ 						 * are restricted to targets in
+ 						 * kernel.
  						 */
 +#define ARCH_CAP_PBRSB_NO		BIT(24)	/*
 +						 * Not susceptible to Post-Barrier
@@ -207,7 +207,7 @@ Signed-off-by: Borislav Petkov <bp@suse.de>
 --- a/arch/x86/kernel/cpu/bugs.c
 +++ b/arch/x86/kernel/cpu/bugs.c
 @@ -1344,6 +1344,53 @@ static enum spectre_v2_mitigation __init
- 	return SPECTRE_V2_RETPOLINE;
+ 	}
  }
  
 +static void __init spectre_v2_determine_rsb_fill_type_at_vmexit(enum spectre_v2_mitigation mode)
